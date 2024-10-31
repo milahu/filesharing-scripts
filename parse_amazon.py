@@ -174,10 +174,10 @@ for cache_path in sys.argv[1:]:
         mi.identifiers.get("amazon") or
         mi.identifiers.get("amazon_de") or # FIXME generic
         to_isbn10(mi.identifiers.get("isbn")) or
-        "no_product_id"
+        None
     )
 
-    if product_id == "no_product_id":
+    if product_id == None:
         print("mi.identifiers", mi.identifiers)
         raise 123
 
@@ -233,15 +233,9 @@ for cache_path in sys.argv[1:]:
     authors = mi.authors_with_roles
     authors = ", ".join(map(trim, authors))
 
-    #asin = mi.identifiers.get("amazon")
+    assert product_id != None
 
-    product_id = (
-        mi.identifiers.get("amazon") or
-        to_isbn10(mi.identifiers.get("isbn")) or
-        None
-    )
-
-    if product_id:
+    if True:
         if url:
             url = re.sub("(https://www.amazon.[a-z.]+)/.*", r"\1/dp/" + product_id, url)
         else:
