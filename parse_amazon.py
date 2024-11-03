@@ -224,14 +224,17 @@ for cache_path in sys.argv[1:]:
 
 
 
-    def trim(s):
-        return re.sub("\s+", " ", s).strip()
+    def fix_author(s):
+        s = re.sub("\s+", " ", s).strip()
+        if s in ("& 0 more", "& 0 mehr"):
+            return None
+        return s
 
 
 
     #authors = mi.authors
     authors = mi.authors_with_roles
-    authors = ", ".join(map(trim, authors))
+    authors = ", ".join(filter(bool, map(fix_author, authors)))
 
     assert product_id != None
 
