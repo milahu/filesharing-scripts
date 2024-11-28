@@ -14,8 +14,15 @@ pkgs.mkShell {
       eyed3
       dateparser
 
-      # fixme: this should be in pkgs.calibre.buildInputs
+      # FIXME these should be in pkgs.calibre.buildInputs
       mechanize
+      msgpack
+      lxml
+      html5-parser
+      pyqt6
+      css-parser
+      markdown
+      html2text
     ]))
   ] ++ pkgs.calibre.buildInputs;
 }
