@@ -226,7 +226,7 @@ for cache_path in sys.argv[1:]:
 
     def fix_author(s):
         s = re.sub("\s+", " ", s).strip()
-        if s in ("& 0 more", "& 0 mehr"):
+        if re.fullmatch(r"& [0-9]+ (?:more|mehr)", s):
             return None
         return s
 
