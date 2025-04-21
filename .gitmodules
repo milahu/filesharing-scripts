@@ -1,0 +1,4 @@
+[submodule "calibre"]
+	path = calibre
+	url = https://github.com/milahu/calibre
+	branch = fix-amazon-parser
