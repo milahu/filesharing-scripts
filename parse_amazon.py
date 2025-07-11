@@ -182,7 +182,7 @@ for cache_path in sys.argv[1:]:
         raise 123
 
     output_path = f"{mi.title}.{product_id}.txt"
-    output_path = re.sub("[/\\\n\r]", "_", output_path)
+    output_path = re.sub(r"[/\\\n\r]", "_", output_path)
 
     if os.path.exists(output_path):
         print("keeping", output_path)
@@ -215,7 +215,7 @@ for cache_path in sys.argv[1:]:
             res[-1] += part
     #res = list(filter(lambda s: s != "", res))
     res = "\n".join(res)
-    res = re.sub("\s*</p>\s*<p>\s*", "\n\n", res)
+    res = re.sub(r"\s*</p>\s*<p>\s*", "\n\n", res)
     if res.startswith("<p>"):
         res = res[3:]
     if res.endswith("</p>"):
@@ -225,7 +225,7 @@ for cache_path in sys.argv[1:]:
 
 
     def fix_author(s):
-        s = re.sub("\s+", " ", s).strip()
+        s = re.sub(r"\s+", " ", s).strip()
         if re.fullmatch(r"& [0-9]+ (?:more|mehr)", s):
             return None
         return s
@@ -240,7 +240,7 @@ for cache_path in sys.argv[1:]:
 
     if True:
         if url:
-            url = re.sub("(https://www.amazon.[a-z.]+)/.*", r"\1/dp/" + product_id, url)
+            url = re.sub(r"(https://www.amazon.[a-z.]+)/.*", r"\1/dp/" + product_id, url)
         else:
             # FIXME parse amazon domain (com, de, co.uk, ...) from cache_path
             url = f"https://www.amazon.de/dp/{product_id}"
@@ -287,7 +287,7 @@ for cache_path in sys.argv[1:]:
             for k, v in kv:
                 print(f"{k}: {v}", file=output)
             continue
-        if re.fullmatch("Audible\.[a-z.]{2,10} Release Date", k):
+        if re.fullmatch(r"Audible\.[a-z.]{2,10} Release Date", k):
             if mi.pubdate:
                 v = mi.pubdate.strftime("%F")
         # no. if ASIN is not in product details, there is no ASIN
