@@ -13,6 +13,11 @@ import shutil
 import logging
 
 
+if len(sys.argv) == 1:
+    print("error: no input files")
+    print("usage: parse_amazon.py 1.html 2.html 3.html")
+    sys.exit(1)
+
 
 # set calibre paths
 
