@@ -225,6 +225,9 @@ for cache_path in sys.argv[1:]:
         res = res[3:]
     if res.endswith("</p>"):
         res = res[:-4]
+    res = re.sub(r"<br\s*/?>", "\n", res)
+    res = re.sub(r"</?strong>", "**", res) # bold
+    res = re.sub(r"</?em>", "*", res) # italic
     product_description = res
 
 
