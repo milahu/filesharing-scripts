@@ -319,8 +319,13 @@ for cache_path in sys.argv[1:]:
             print(f"{k}: {v}", file=output)
         elif isinstance(v, list):
             print(f"{k}:", file=output)
+            prev_line = None
             for line in v:
+                if prev_line and line.startswith(prev_line):
+                    # ignore duplicate lines
+                    continue
                 print(f"  {line}", file=output)
+                prev_line = line
 
     output.close()
 
