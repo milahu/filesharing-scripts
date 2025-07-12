@@ -114,6 +114,11 @@ log.outputs = [calibre.utils.logging.ANSIStream(sys.stderr)]
 import traceback
 
 
+def normalize_space(s):
+    s = s.strip()
+    s = re.sub(r"[ \t]+", " ", s)
+    return s
+
 
 # based on https://github.com/xlcnd/isbnlib/raw/dev/isbnlib/_core.py
 
@@ -316,7 +321,7 @@ for cache_path in sys.argv[1:]:
         if k == "ISBN-13":
             v = v.replace("-", "")
         if isinstance(v, str):
-            print(f"{k}: {v}", file=output)
+            print(f"{k}: {normalize_space(v)}", file=output)
         elif isinstance(v, list):
             print(f"{k}:", file=output)
             prev_line = None
@@ -324,7 +329,7 @@ for cache_path in sys.argv[1:]:
                 if prev_line and line.startswith(prev_line):
                     # ignore duplicate lines
                     continue
-                print(f"  {line}", file=output)
+                print(f"  {normalize_space(line)}", file=output)
                 prev_line = line
 
     output.close()
