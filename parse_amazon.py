@@ -113,14 +113,6 @@ log.outputs = [calibre.utils.logging.ANSIStream(sys.stderr)]
 
 import traceback
 
-def log_exception(self, *args, **kwargs):
-    limit = kwargs.pop('limit', None)
-    print(*args, **kwargs)
-    print(traceback.format_exc(limit))
-    #raise
-
-log.exception = log_exception
-
 
 
 # based on https://github.com/xlcnd/isbnlib/raw/dev/isbnlib/_core.py
@@ -150,6 +142,16 @@ for cache_path in sys.argv[1:]:
 
     result_queue = queue.Queue()
 
+    def log_exception(self, *args, **kwargs):
+        global result_queue
+        limit = kwargs.pop('limit', None)
+        print(*args, **kwargs)
+        print(traceback.format_exc(limit))
+        result_queue.put(getattr(sys, "last_exc", Exception(*args, **kwargs)))
+        #raise
+
+    log.exception = log_exception
+
     # Get book details from amazons book page
     worker = calibre.ebooks.metadata.sources.amazon.Worker(
         url,
@@ -172,6 +174,10 @@ for cache_path in sys.argv[1:]:
     mi = result_queue.get()
 
     del worker
+
+    if isinstance(mi, Exception):
+        print(f"failed to parse {cache_path!r}")
+        continue
 
     #print("mi"); print(mi); print("mi.rating", mi.rating); sys.exit()
 
