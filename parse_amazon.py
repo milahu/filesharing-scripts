@@ -231,7 +231,10 @@ for cache_path in sys.argv[1:]:
             res[-1] += part
     #res = list(filter(lambda s: s != "", res))
     res = "\n".join(res)
-    res = re.sub(r"\s*</p>\s*<p>\s*", "\n\n", res)
+    res = re.sub(r"</?p>", "\n", res)
+    res = re.sub(r"</?ul>", "\n", res)
+    res = re.sub(r"<li>", "- ", res)
+    res = re.sub(r"</li>", "", res)
     if res.startswith("<p>"):
         res = res[3:]
     if res.endswith("</p>"):
