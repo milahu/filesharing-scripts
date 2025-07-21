@@ -307,7 +307,7 @@ for cache_path in sys.argv[1:]:
             kv.append(("Edition", v2))
             kv.append(("Release Date", v3))
             for k, v in kv:
-                print(f"{k}: {v}", file=output)
+                print(f"- {k}: {v}", file=output)
             continue
         if re.fullmatch(r"Audible\.[a-z.]{2,10} Release Date", k):
             if mi.pubdate:
@@ -319,20 +319,20 @@ for cache_path in sys.argv[1:]:
             k2 = "ASIN"
             v2 = mi.identifiers.get("amazon")
             if v2:
-                print(f"{k2}: {v2}", file=output)
+                print(f"- {k2}: {v2}", file=output)
         '''
         if k == "ISBN-13":
             v = v.replace("-", "")
         if isinstance(v, str):
-            print(f"{k}: {normalize_space(v)}", file=output)
+            print(f"- {k}: {normalize_space(v)}", file=output)
         elif isinstance(v, list):
-            print(f"{k}:", file=output)
+            print(f"- {k}:", file=output)
             prev_line = None
             for line in v:
                 if prev_line and line.startswith(prev_line):
                     # ignore duplicate lines
                     continue
-                print(f"  {normalize_space(line)}", file=output)
+                print(f"  - {normalize_space(line)}", file=output)
                 prev_line = line
 
     output.close()
