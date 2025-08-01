@@ -8,6 +8,7 @@
 
 import os
 import re
+import io
 import sys
 import shutil
 import logging
@@ -204,9 +205,7 @@ for cache_path in sys.argv[1:]:
         print("keeping", output_path)
         continue
 
-    print("writing", output_path)
-
-    output = open(output_path, "w")
+    output = io.StringIO()
 
     '''
     print("mi")
@@ -335,6 +334,15 @@ for cache_path in sys.argv[1:]:
                 print(f"  - {normalize_space(line)}", file=output)
                 prev_line = line
 
-    output.close()
+    output_str = output.getvalue()
 
-    #print("done", output_path)
+    # remove empty indents
+    output_str = re.sub(r"\n[ \t]+\n", "\n\n", output_str)
+    output_str = re.sub(r"\n[ \t]+\n", "\n\n", output_str) # again
+
+    # remove extra empty lines
+    output_str = re.sub(r"\n{3,}", "\n\n", output_str)
+
+    print("writing", output_path)
+    with open(output_path, "w") as f:
+        f.write(output_str)
