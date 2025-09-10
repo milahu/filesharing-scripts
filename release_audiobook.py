@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+write_extended_m3u_playlist = False
+
 import os
 import re
 import io
@@ -12,6 +14,7 @@ import subprocess
 
 import mutagen
 import eyed3
+import audioread
 
 
 
@@ -247,16 +250,22 @@ trash_patterns = [
     "*HOERBUCH_SAMMLUNG.txt",
     "*Hoerbuchsammlung*html",
     "*Bitte klicken um meine Re-Uploads zu Unterstützen, Danke.html",
+    "_*.txt",
+    "Thumbs.db",
+    "desktop.ini",
 ]
 for p in trash_patterns:
-    for f in glob.glob(p):
-        os.rename(f, "trash/" + f)
+    for f in glob.glob("**/" + p, recursive=True):
+        if f.startswith("trash/"): continue
+        # TODO handle dst path collisions
+        os.rename(f, "trash/" + os.path.basename(f))
 
 
 
 rename_files = (
     ("cover.jpeg", "cover.jpg"),
     ("folder.jpeg", "folder.jpg"),
+    ("eBook", "ebook"),
 )
 
 for a, b in rename_files:
@@ -462,6 +471,8 @@ for idx, name in enumerate(file_list):
     match = re.search("(0*)" + num0 + "[^0-9]", name)
     if not match:
         print(f"line 100: bad name {name!r} for file number {num}")
+        found_pattern = False
+        break # debug
         sys.exit(1)
     extra_zeros = match.group(1)
     rename_files.append((name, num))
@@ -524,6 +535,8 @@ for name, num in rename_files:
                     #print(f"mv {name!r} {name2!r}")
             else:
                 print(f"error: failed to parse title from filename {name!r} with regex {title_regex!r}")
+                rename_files_2 = []
+                break # debug
                 sys.exit(1)
 
     match = re.match("^(0*)" + num0 + "[^0-9]", name2)
@@ -558,6 +571,7 @@ for name, name2 in rename_files_2:
 
 
 # remove duplicate track numbers from filenames
+print("removing duplicate track numbers from filenames")
 #found_pattern = False
 found_pattern = True
 rename_files = []
@@ -600,11 +614,24 @@ for name, name2 in rename_files:
 
 
 def print_tags(tags):
+    print("print_tags ...")
     for key in tags:
+        print("print_tags", key)
         if key.startswith("APIC:"):
             # picture
             continue
+        if key.startswith("TCON"):
+            # FIXME printing this value makes the script stop silently in
+            # Interview mit Jan van Helsing (2006)/308.mp3
+            break # stop before PRIV:PeakValue:
+            continue
+        if key.startswith("PRIV:PeakValue:"):
+            # FIXME printing this value makes the script stop silently in
+            # Interview mit Jan van Helsing (2006)/308.mp3
+            # break
+            continue
         print(name, key, tags[key])
+    print("print_tags done")
 
 # map from mutagen.oggopus to x
 """
@@ -715,6 +742,7 @@ def get_track(tags):
     return get_tag(("TRCK", "tracknumber"))
 
 # read tags
+print("reading tags")
 file_list = sorted(glob.glob("*" + file_extension))
 print("180 file_list", file_list)
 num_format = "{:0" + str(len(str(len(file_list)))) + "d}"
@@ -729,15 +757,18 @@ if 0:
     for idx, name, tags in idx_name_tags_list:
         title = get_title(tags)
         print(f"file {idx}: title {len(title)} {title!r}")
+    print("done: debug: print titles with sizes")
     sys.exit()
 
 # debug: print tags
+print("debug: printing tags")
 for idx, name, tags in idx_name_tags_list:
     num = idx + 1
     print_tags(tags)
     print()
 
 # check if all titles are equal
+print("checking if all titles are equal")
 _title = None
 same_track_titles = True
 for idx, name, tags in idx_name_tags_list:
@@ -981,6 +1012,8 @@ input()
 #num_format = "{:0" + str(len(str(len(file_list)))) + "d}"
 #_track_title = None
 
+playlist = []
+
 for idx, name in enumerate(file_list):
 
     num = idx + 1
@@ -1083,6 +1116,21 @@ for idx, name in enumerate(file_list):
     title = get_title(idx_name_tags_list[idx][2])
     set_tag("title", title)
 
+    if write_extended_m3u_playlist:
+        # track_seconds = round(mutagen.mp3.MP3(name).info.length)
+        with audioread.audio_open(name) as f:
+            track_seconds = round(f.duration)
+    else:
+        track_seconds = 0
+
+    playlist_item = (
+        main_args.artist,
+        title,
+        track_seconds,
+        name, # filename
+    )
+    playlist.append(playlist_item)
+
     # narrator goes to albumartist or composer
     # but personally, i find albumartist better
     # because "composer" is a different job
@@ -1175,6 +1223,32 @@ for idx, name in enumerate(file_list):
 
     # debug
     #print("TODO check", name); sys.exit()
+
+
+
+# write m3u playlist
+
+file_num_len = len(str(len(playlist)))
+playlist_filename = ("0" * file_num_len) + ".m3u"
+with open(playlist_filename, "w") as f:
+    if write_extended_m3u_playlist:
+        print("#EXTM3U", file=f)
+    for playlist_item in playlist:
+        (
+            artist,
+            title,
+            track_seconds,
+            name, # filename
+        ) = playlist_item
+        if write_extended_m3u_playlist:
+            if artist and title:
+                artist_title = f"{artist} - {title}"
+            elif title:
+                artist_title = title
+            else:
+                raise ValueError(f"no track title in playlist_item {playlist_item}")
+            print(f"#EXTINF:{track_seconds or 0},{artist_title}", file=f)
+        print(name, file=f)
 
 
 

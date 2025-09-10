@@ -13,6 +13,7 @@ pkgs.mkShell {
       mutagen # todo better https://github.com/quodlibet/mutagen/issues/651
       eyed3
       dateparser
+      audioread
 
       # FIXME these should be in pkgs.calibre.buildInputs
       mechanize
