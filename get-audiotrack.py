@@ -3,6 +3,8 @@
 # CGI script
 # based on milahu/opensubtitles-scraper/get-subs.py
 
+# https://github.com/milahu/filesharing-scripts/blob/main/get-audiotrack.py
+
 # TODO is this safe?
 # def dir_contains(dir_path, file_path):
 
@@ -131,6 +133,14 @@ def show_help_cgi():
     print()
     print("because my upload is slow = only 40 Mbit/s = 5 MByte/s")
     print("because audiotracks are 10x smaller than video files")
+    print()
+    print()
+    print()
+    print("related")
+    print()
+    print("get-keyframes can be used to get a compressed video track")
+    print("to check and fix audio/video sync")
+    print("when muxing the audio track with a different video track")
 
     sys.exit()
 
@@ -369,6 +379,10 @@ def get_video_audiotrack(cas_config, args):
         print(">", shlex.join(args), file=sys.stderr)
 
     # TODO fork? spawn?
+    # no, blocking here is useful for clients to see when ffmpeg is done
+    # audiotrack_path is predictable via video_path and audiotrack_id
+    # audiotrack_path = f"{video_path}.a{audiotrack_id}.mka"
+    # so clients can start fetching the output file ASAP for streaming
     proc = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
     if proc.returncode == 0:
