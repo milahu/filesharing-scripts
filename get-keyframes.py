@@ -3,6 +3,8 @@
 # extract keyframes from a video file
 # useful to sync audiotracks between multiple video files
 
+# https://github.com/milahu/filesharing-scripts/blob/main/get-keyframes.py
+
 # based on
 # https://superuser.com/questions/669716
 # How to extract all key frames from a video clip?
